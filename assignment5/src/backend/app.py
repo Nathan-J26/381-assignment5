@@ -45,6 +45,22 @@ def register():
         students.append(data)
         return "Successfully enrolled!"
 
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    username = data['username']
+    password = data['password']
+    valid = False
+    user = None
+    for i in students:
+        if(i["username"]==username):
+            if(i["password"]==password):
+                valid = True
+                user = i
+                break
+    if valid:
+        return {'success':True, 'message':"Successful Login", 'user':user}
+    return {'success':False, 'message':"Error, no matching credentials"}
 
 if __name__ == "__main__":
     app.run(debug=True)
