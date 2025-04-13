@@ -169,7 +169,6 @@ const RegForm = () => {
 
     // Function to handle form submission
     async function handleSubmit(event) {
-        // event.preventDefault();
     
         const backendEndpoint = 'http://127.0.0.1:5000/register';
         try {

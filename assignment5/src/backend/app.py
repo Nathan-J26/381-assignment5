@@ -31,6 +31,7 @@ students = [
     } # adding one hardcoded student for testing
 ]
 
+
 @app.route('/register', methods=['POST'])
 def register():
     data = request.get_json() # Retrieves the JSON data from the incoming request and store it in a dictionary
