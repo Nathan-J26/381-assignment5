@@ -68,5 +68,9 @@ def getTestimonials():
     random.shuffle(testimonials)
     return {'testimonials':testimonials[0:2]}
 
+@app.route('/courses', methods=["GET"])
+def getCourses():
+    return{'courses':courses}
+
 if __name__ == "__main__":
     app.run(debug=True)
