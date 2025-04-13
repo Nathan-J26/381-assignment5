@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from "react";
 import Header from "./Header";
 import Footer from "./Footer";
-import courses from "../data/courses";
-import testimonials from "../data/testimonials";
 
 const Homepage = () => {
   const [featuredCourses, setFeaturedCourses] = useState([]);
   const [randomTestimonials, setRandomTestimonials] = useState([]);
 
+
   useEffect(() => {
     // Select 3 random courses
-    const shuffledCourses = [...courses].sort(() => 0.5 - Math.random());
-    setFeaturedCourses(shuffledCourses.slice(0, 3));
+    // const shuffledCourses = [...courses].sort(() => 0.5 - Math.random());
+    // setFeaturedCourses(shuffledCourses.slice(0, 3));
+
+    
 
     // Select 2 random testimonials
     // const shuffledTestimonials = [...testimonials].sort(
@@ -41,6 +42,22 @@ const Homepage = () => {
       .catch((error) => {
         console.error(error);
       });
+
+    fetch("http://127.0.0.1:5000/courses", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        const shuffledCourses = [...data["courses"]].sort(() => 0.5 - Math.random());
+        setFeaturedCourses(shuffledCourses.slice(0, 3));
+      })
+      .catch((error) => {
+        console.error(error);
+    });
+
   }, []);
 
   return (
