@@ -7,7 +7,7 @@ from flask import Flask, request, jsonify
 import json
 import os
 from flask_cors import CORS
-
+import random
 
 app = Flask(__name__)
 CORS(app)
@@ -57,6 +57,7 @@ def register():
 
 @app.route('/login', methods=['POST'])
 def login():
+    print(type(testimonials))
     data = request.get_json()
     username = data['username']
     password = data['password']
@@ -71,6 +72,15 @@ def login():
     if valid:
         return {'success':True, 'message':"Successful Login", 'user':user}
     return {'success':False, 'message':"Error, no matching credentials"}
+
+@app.route('/testimonials', methods=["GET"] )
+def getTestimonials():
+    random.shuffle(testimonials)
+    return {'testimonials':testimonials[0:2]}
+
+@app.route('/courses', methods=["GET"])
+def getCourses():
+    return{'courses':courses}
 
 if __name__ == "__main__":
     app.run(debug=True)
