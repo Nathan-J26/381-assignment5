@@ -40,10 +40,20 @@ def register():
             duplicateStudent = True
             break
     if(duplicateStudent):
+        print(students)
         return "Error: Username is already in use. Please select another username."
     else:
-        students.append(data)
-        return "Successfully enrolled!"
+        students.append(
+            {
+                "id":len(students)+1,
+                "username":data["username"],
+                "password":data["password"],
+                "email":data["email"],
+                "enrolled_courses":[]
+            }
+        )
+        print(students)
+        return "Successfully enrolled. Redirecting to login page."
 
 @app.route('/login', methods=['POST'])
 def login():
