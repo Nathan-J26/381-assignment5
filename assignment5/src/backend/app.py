@@ -25,7 +25,7 @@ students = [
     {
         "id": 1,
         "username": "alice",
-        "password": "password123",
+        "password": "Password123!",
         "email": "alice@example.com",
         "enrolled_courses": []
     } # adding one hardcoded student for testing
@@ -82,6 +82,48 @@ def getTestimonials():
 @app.route('/courses', methods=["GET"])
 def getCourses():
     return{'courses':courses}
+
+
+@app.route("/enroll/<int:student_id>", methods=["POST"])
+def enroll_course(student_id):
+    data = request.get_json()
+    print(f"Enroll request for student {student_id}: {data}")
+    
+    for student in students:
+        if student["id"] == student_id:
+            if(data in student["enrolled_courses"]):
+                return f"Course '{data.get('name')}' is already enrolled.", 400
+            
+            student["enrolled_courses"].append(data)
+            print(students)
+            return f"Course '{data.get('name')}' enrolled successfully!", 200
+
+    return "Student not found.", 404
+
+@app.route("/drop/<int:student_id>", methods=["DELETE"])
+def drop_course(student_id):
+    data = request.get_json()
+    print(f"Drop request for student {student_id}: {data}")
+    
+    for student in students:
+        print(student)
+        if student["id"] == student_id:
+            print(student)
+            if(data in student["enrolled_courses"]):
+                student["enrolled_courses"].remove(data)
+                return f"Course '{data.get('name')}' dropped successfully!", 200
+            
+            return f"Course '{data.get('name')}' is not enrolled.", 400
+
+    return "Student not found.", 404
+
+@app.route("/student_courses/<int:student_id>", methods=["GET"])
+def get_student_courses(student_id):
+    for student in students:
+        if student["id"] == student_id:
+            return jsonify(student["enrolled_courses"]), 200
+    return jsonify([]), 200
+
 
 if __name__ == "__main__":
     app.run(debug=True)

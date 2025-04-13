@@ -3,16 +3,12 @@ import Header from "./Header";
 import Footer from "./Footer";
 import CourseItem from "./CourseItem";
 import EnrollmentList from "./EnrollmentList";
-// import courses from "../data/courses";
 
 const CoursesPage = () => {
-  const [enrolledCourses, setEnrolledCourses] = useState(() => {
-    const saved = localStorage.getItem("enrollments");
-    return saved ? JSON.parse(saved) : [];
-  });
-
+  const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [theCourses, setTheCourses] = useState([]);
 
+  // Fetch all available courses
   useEffect(() => {
     fetch("http://127.0.0.1:5000/courses", {
       method: "GET",
@@ -26,26 +22,99 @@ const CoursesPage = () => {
       });
   }, []);
 
-  // Save to localStorage
+  // Fetch enrolled courses from backend when page loads
+  useEffect(() => {
+    const studentId = localStorage.getItem("studentID");
+    if (!studentId) return;
+
+    fetch(`http://127.0.0.1:5000/student_courses/${studentId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        const coursesWithIds = data.map((course) => ({
+          ...course,
+          enrollmentId: Date.now() + Math.random(), // generate unique IDs
+        }));
+        setEnrolledCourses(coursesWithIds);
+        localStorage.setItem("enrollments", JSON.stringify(coursesWithIds));
+      })
+      .catch((error) => {
+        console.error("Failed to fetch enrolled courses:", error);
+        setEnrolledCourses([]);
+      });
+  }, []);
+
+  // Save to localStorage when enrolledCourses changes
   useEffect(() => {
     localStorage.setItem("enrollments", JSON.stringify(enrolledCourses));
   }, [enrolledCourses]);
-  useEffect(() => {});
 
-  const handleEnroll = (course) => {
-    setEnrolledCourses((prev) => [
-      ...prev,
-      {
-        ...course,
-        enrollmentId: Date.now(), // Unique ID for each enrollment
-      },
-    ]);
+  const handleEnroll = async (course) => {
+    const studentId = localStorage.getItem("studentID");
+    course = {
+      ...course,
+      enrollmentId: Date.now(), // add a unique enrollmentID
+    }
+    try {
+      const response = await fetch(`http://127.0.0.1:5000/enroll/${studentId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(course),
+      });
+
+      const message = await response.text();
+
+      if (response.ok) {
+        setEnrolledCourses((prev) => [
+          ...prev,
+          {
+            ...course,
+          },
+        ]);
+        alert(message);
+      } else {
+        alert("Enrollment failed: " + message);
+      }
+    } catch (error) {
+      alert("Error during enrollment. Try again later.");
+      console.error(error);
+    }
   };
 
-  const handleRemove = (enrollmentId) => {
-    setEnrolledCourses((prev) =>
-      prev.filter((course) => course.enrollmentId !== enrollmentId)
-    );
+  const handleRemove = async (enrollmentId) => {
+    const studentId = localStorage.getItem("studentID");
+    const courseToDrop = enrolledCourses.find(course => course.enrollmentId === enrollmentId);
+    if (!courseToDrop) return;
+
+    try {
+      const response = await fetch(`http://127.0.0.1:5000/drop/${studentId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(courseToDrop),
+      });
+
+      const message = await response.text();
+
+      if (response.ok) {
+        setEnrolledCourses((prev) =>
+          prev.filter((course) => course.enrollmentId !== enrollmentId)
+        );
+        alert(message);
+      } else {
+        alert(`Error: ${message}`);
+      }
+    } catch (error) {
+      console.error("Failed to drop course:", error);
+      alert("Something went wrong. Please try again later.");
+    }
   };
 
   return (

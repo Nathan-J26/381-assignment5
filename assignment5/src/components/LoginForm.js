@@ -38,6 +38,7 @@ const LoginForm = () => {
       // if (validUser) {
       if (data["success"]) {
         login(data["user"]);
+        localStorage.setItem("studentID", data["user"]["id"])
         // Redirect after 2 seconds
         document.getElementById("loginMessage").textContent = data["message"];
         setTimeout(() => {
